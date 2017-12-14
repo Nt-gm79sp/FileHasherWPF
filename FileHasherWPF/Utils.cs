@@ -28,6 +28,7 @@ namespace Utils
             public string path;
             public string hash;
         }
+        public const string FILE_ERROR = "文件读取错误！";
 
         public static FileResult GetFileHash(string hashType, string filePath, bool isFullPath)
         {
@@ -41,7 +42,7 @@ namespace Utils
             }
             catch
             {
-                result.hash = "文件读取错误！";
+                result.hash = FILE_ERROR;
             }
             finally
             {

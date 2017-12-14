@@ -43,8 +43,11 @@ namespace FileHasherWPF
             {
                 GetHash.FileResult result = GetHash.GetFileHash(hashType, f, isFullPath);
                 // 显示文本
-                textBox_HashCode.Text = result.hash;
-                textBox_Stream.Text += result.path + "\r\n" + result.hash+"\r\n\r\n";
+                if (result.hash != GetHash.FILE_ERROR)
+                {
+                    textBox_HashCode.Text = result.hash;
+                }
+                textBox_Stream.Text += result.path + "\r\n" + result.hash + "\r\n\r\n";
                 // 滚动到最后一行
                 textBox_Stream.Focus();
                 textBox_Stream.CaretIndex = textBox_Stream.Text.Length; // 插入光标到末尾
