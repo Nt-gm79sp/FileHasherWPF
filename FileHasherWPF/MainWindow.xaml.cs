@@ -37,7 +37,7 @@ namespace FileHasherWPF
             InitializeComponent();
         }
 
-        #region Controller
+        #region ViewModel
         // 处理打开多个文件的逻辑控制
         private void HashFiles(string[] files)
         {
@@ -48,7 +48,6 @@ namespace FileHasherWPF
                 // 是否显示完整路径
                 if (isFullPath) textBox_Stream.Text += f + "\r\n";
                 else textBox_Stream.Text += System.IO.Path.GetFileName(f) + "\r\n"; // 经典Namespace冲突：Path
-                // 异常处理是否应当写在Controller，有待考量，目前写在这里是因为字体
                 try
                 {
                     FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read);
