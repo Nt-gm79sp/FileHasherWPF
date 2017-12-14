@@ -13,7 +13,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.IO;
 using Utils;
 
 namespace FileHasherWPF
@@ -45,19 +44,10 @@ namespace FileHasherWPF
             FirstClear();
             foreach (string f in files)
             {
-                // 是否显示完整路径
-                if (isFullPath) textBox_Stream.Text += f + "\r\n";
-                else textBox_Stream.Text += System.IO.Path.GetFileName(f) + "\r\n"; // 经典Namespace冲突：Path
-                try
-                {
-                    FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read);
-                    textBox_HashCode.Text = GetHash.GetFileHash(hashType, fs);
-                    textBox_Stream.Text += textBox_HashCode.Text + "\r\n\r\n";
-                }
-                catch
-                {
-                    textBox_Stream.Text += "文件读取错误！\r\n\r\n";
-                }
+                GetHash.FileResult result = GetHash.GetFileHash(hashType, f, isFullPath);
+                // 显示文本
+                textBox_HashCode.Text = result.hash;
+                textBox_Stream.Text += result.path + "\r\n" + result.hash+"\r\n\r\n";
                 // 滚动到最后一行
                 textBox_Stream.Focus();
                 textBox_Stream.CaretIndex = textBox_Stream.Text.Length; // 插入光标到末尾
@@ -156,9 +146,9 @@ namespace FileHasherWPF
             if ((a != "") && (b != ""))
             {
                 if (a.Equals(b, StringComparison.CurrentCultureIgnoreCase))
-                { MessageBox.Show("校验值相同", "恭喜"); }
+                { MessageBox.Show("校验值相同", "恭喜", MessageBoxButton.OK, MessageBoxImage.Information); }
                 else
-                { MessageBox.Show("校验值不同！", "注意！"); }
+                { MessageBox.Show("校验值不同！", "注意！", MessageBoxButton.OK, MessageBoxImage.Exclamation); }
             }
         }
 
