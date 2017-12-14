@@ -17,9 +17,6 @@ using Utils;
 
 namespace FileHasherWPF
 {
-    /// <summary>
-    /// MainWindow.xaml 的交互逻辑
-    /// </summary>
     public partial class MainWindow : Window
     {
         // 指定校验类型
@@ -146,7 +143,7 @@ namespace FileHasherWPF
             if ((a != "") && (b != ""))
             {
                 if (a.Equals(b, StringComparison.CurrentCultureIgnoreCase))
-                { MessageBox.Show("校验值相同", "恭喜", MessageBoxButton.OK, MessageBoxImage.Information); }
+                { MessageBox.Show("校验值相同", "恭喜"); }
                 else
                 { MessageBox.Show("校验值不同！", "注意！", MessageBoxButton.OK, MessageBoxImage.Exclamation); }
             }
