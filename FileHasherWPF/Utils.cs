@@ -35,6 +35,9 @@ namespace Utils
             FileResult result;
             try
             {
+                // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
+                // 不必手动关闭文件流，读取过程中隐含了Dispose()方法。如果要写注意写在finally中
+                // 因为写在try中，所以不必using(){}的用法
                 FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
                 HashAlgorithm hashCode = HashAlgorithm.Create(hashType);
                 byte[] hashCodeBytes = hashCode.ComputeHash(fs);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Utils;
+
 
 namespace FileHasherWPF
 {
@@ -39,9 +40,15 @@ namespace FileHasherWPF
         {
             if (files.Length <= 0) return;
             FirstClear();
-            foreach (string f in files)
+            var results = new GetHash.FileResult[files.Length];
+            Parallel.For(0, files.Length,
+                index =>
             {
-                GetHash.FileResult result = GetHash.GetFileHash(hashType, f, isFullPath);
+                results[index] = GetHash.GetFileHash(hashType, files[index], isFullPath);
+            });
+
+            foreach (var result in results)
+            {
                 // 显示文本
                 if (result.hash != GetHash.FILE_ERROR)
                 {
