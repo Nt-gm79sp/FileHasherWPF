@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FileHasherWPF"
         mc:Ignorable="d"
         Title="File Hasher WPF" Topmost="True" Height="310" Width="700" MinHeight="310" MinWidth="680"
-        AllowDrop="True" Drop="OnFilesDrop" DragEnter="OnDragEnter" DragLeave="OnDragLeave">
+        AllowDrop="True" Drop="OnFilesDrop" PreviewDragEnter="OnDragEnter" DragLeave="OnDragLeave">
     <Grid x:Name="MainGrid" Margin="5">
         <!--定义行-->
         <!--Auto表示根据内容设定大小，*表示根据空间填充大小-->
@@ -80,6 +80,7 @@
                 Content="打开文件" Click="Button_GetHash_Click"/>
         <Button Grid.Row="6" Grid.Column="4" x:Name="button_CompareHash"
                 Content="比较哈希值" Click="Button_CompareHash_Click"/>
+        <!--WPF中元素显示层级是按文档自下而上（自新而旧）的，所以以下组件不需额外设置属性，天然显示在顶层-->
         <Label x:Name="DropOverlay" Grid.RowSpan="7" Grid.ColumnSpan="5" Margin="-5"
                Background="#CC000000" Foreground="White" Visibility="Hidden"
                Content="松开鼠标开始计算文件哈希值" FontSize="24" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>

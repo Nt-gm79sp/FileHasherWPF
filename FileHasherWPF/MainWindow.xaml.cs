@@ -43,7 +43,7 @@ namespace FileHasherWPF
         // 处理打开多个文件的逻辑控制
         private void HashFiles(string[] files)
         {
-            if (files.Length <= 0) return;
+            if ((files == null) || (files.Length <= 0)) return;
             FirstClear();
             var results = new GetHash.FileResult[files.Length];
             Parallel.For(0, files.Length,
@@ -119,6 +119,15 @@ namespace FileHasherWPF
         }
 
         // 拖放文件到窗口
+        // WPF中，TextBox组件无法直接在DragEnter事件中接受文件的拖放，而是显示为“禁止”的鼠标指针，
+        // 这是WPF的特性，是优点，TextBox理应只接受String。
+        // 但当不需要这种特性时，使用【PreviewDragEnter】事件响应即可完美解决，简洁优雅。
+        // WinForm不用考虑这个特性，但却要处理数据关系的问题。
+        // WinForm使用的是Direct Event，而WPF则有Bubbling Event与Tunneling Event，Preview开头的属于后者
+        // https://docs.microsoft.com/en-us/dotnet/framework/wpf/advanced/routed-events-overview
+        // 在研究过程中，曾用过一个丑陋的workaround：
+        // textBox_Stream.IsHitTestVisible = false
+        // 这样实际上拖放时是到其下层的窗体，但也使得TextBox不能鼠标操作，变成只能看不能点的组件。
         private void OnDragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
