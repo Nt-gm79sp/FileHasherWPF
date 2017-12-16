@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FileHasherWPF"
         mc:Ignorable="d"
         Title="File Hasher WPF" Topmost="True" Height="310" Width="700" MinHeight="310" MinWidth="680"
-        AllowDrop="True" Drop="DropFiles">
+        AllowDrop="True" Drop="OnFilesDrop" DragEnter="OnDragEnter">
     <Grid x:Name="MainGrid" Margin="5">
         <!--定义行-->
         <!--Auto表示根据内容设定大小，*表示根据空间填充大小-->
@@ -32,7 +32,7 @@
         </Grid.ColumnDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Top"
-                   Text="字符串" />
+                   Text="字符串"/>
 
         <!--第二按钮参考：Height="25" Margin="0,53,0,0"-->
         <Button Grid.Row="0" Grid.Column="0" x:Name="button_Clear" VerticalAlignment="Top" Height="30" Margin="0,22,0,0"
@@ -41,34 +41,34 @@
                 Content="停止" Visibility="Hidden" Click="Button_Stop_Click"/>
         <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Margin="0,85,0,0"
                   x:Name="checkBox_IsText" Content="校验&#xD;&#xA;文本" Checked="CheckBox_IsText_Checked" Unchecked="CheckBox_IsText_Unchecked"/>
-        <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Margin="0,120,0,0" 
+        <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Margin="0,120,0,0"
                   x:Name="checkBox_IsFullPath" Content="完整&#xD;&#xA;路径" Checked="CheckBox_IsFullPath_Checked" Unchecked="CheckBox_IsFullPath_Unchecked"/>
         <TextBox Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3" x:Name="textBox_Stream"
                  IsReadOnly="True" IsReadOnlyCaretVisible="True" TextWrapping="NoWrap"
                  AcceptsReturn="True" ScrollViewer.CanContentScroll="True"
                  ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"
                  Text="直接将文件拖入窗口即可计算哈希值&#xD;&#xA;支持多个文件&#xD;&#xA;在下方选择校验类型"
-                 TextChanged="TextBox_Stream_TextChanged" GotFocus="TextBox_Stream_GotFocus" />
+                 TextChanged="TextBox_Stream_TextChanged" GotFocus="TextBox_Stream_GotFocus"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="哈希值"
                    VerticalAlignment="Center"/>
-        <TextBox Grid.Row="2" Grid.Column="2" x:Name="textBox_HashCode" IsReadOnly="True" 
-                 FontFamily="Consolas" FontWeight="Bold" FontSize="14" 
+        <TextBox Grid.Row="2" Grid.Column="2" x:Name="textBox_HashCode" IsReadOnly="True"
+                 FontFamily="Consolas" FontWeight="Bold" FontSize="14"
                  MaxLines="1" Background="#FFEEEEEE" Visibility="Visible"/>
         <ProgressBar Grid.Row="2" Grid.Column="2" x:Name="progressBar" Visibility="Hidden"/>
-        <Button Grid.Row="2" Grid.Column="4" x:Name="button_Copy" 
+        <Button Grid.Row="2" Grid.Column="4" x:Name="button_Copy"
                 Content="复制" Click="Button_Copy_Click"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Text="对照值"
                    VerticalAlignment="Center"/>
-        <TextBox Grid.Row="4" Grid.Column="2" x:Name="textBox_HashCodeForCompare" 
-                 FontFamily="Consolas" FontWeight="Bold" FontSize="14" 
-                 MaxLines="1" />
-        <Button Grid.Row="4" Grid.Column="4" x:Name="button_Paste" 
-                Content="粘贴" Click="Button_Paste_Click" />
+        <TextBox Grid.Row="4" Grid.Column="2" x:Name="textBox_HashCodeForCompare"
+                 FontFamily="Consolas" FontWeight="Bold" FontSize="14"
+                 MaxLines="1"/>
+        <Button Grid.Row="4" Grid.Column="4" x:Name="button_Paste"
+                Content="粘贴" Click="Button_Paste_Click"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Text="校验类型"
-                   VerticalAlignment="Center" />
+                   VerticalAlignment="Center"/>
         <StackPanel Grid.Row="6" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"
                     Orientation="Horizontal">
             <RadioButton x:Name="radioButton_MD5" Content="MD5" Margin="5,0,0,0" Checked="RadioButton_MD5_Checked"/>
@@ -77,8 +77,11 @@
             <RadioButton x:Name="radioButton_SHA512" Content="SHA512" Margin="10,0,0,0" Checked="RadioButton_SHA512_Checked"/>
         </StackPanel>
         <Button Grid.Row="6" Grid.Column="2" x:Name="button_GetHash" HorizontalAlignment="Right" Margin="0,0,10,0" Width="80"
-                Content="打开文件" Click="Button_GetHash_Click" />
+                Content="打开文件" Click="Button_GetHash_Click"/>
         <Button Grid.Row="6" Grid.Column="4" x:Name="button_CompareHash"
-                Content="比较哈希值" Click="Button_CompareHash_Click" />
+                Content="比较哈希值" Click="Button_CompareHash_Click"/>
+        <Label x:Name="DropOverlay" Grid.RowSpan="7" Grid.ColumnSpan="5" Margin="-5"
+               Background="#CC000000" Foreground="White" Visibility="Hidden"
+               Content="松开鼠标开始计算文件哈希值" FontSize="24" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
     </Grid>
 </Window>

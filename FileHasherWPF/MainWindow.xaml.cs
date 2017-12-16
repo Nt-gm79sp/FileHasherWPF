@@ -119,22 +119,19 @@ namespace FileHasherWPF
         }
 
         // 拖放文件或字符串到窗口
-        //private void OnDragEnter(object sender, DragEventArgs e)
-        //{
-        //    e.Handled = true;
-        //    e.Effects = DragDropEffects.Copy;
-        //}
-        private void DropFiles(object sender, DragEventArgs e)
+        private void OnDragEnter(object sender, DragEventArgs e)
+        {
+
+            //e.Handled = true;
+            //e.Effects = DragDropEffects.Copy;
+        }
+        private void OnFilesDrop(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 HashFiles(files);
             }
-            //if (e.Data.GetDataPresent(DataFormats.StringFormat))
-            //{
-            //    HashText();
-            //}
         }
         #endregion
 
