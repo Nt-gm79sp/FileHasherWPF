@@ -76,10 +76,9 @@
             <RadioButton x:Name="radioButton_SHA256" Content="SHA256" Margin="15,0,0,0" IsChecked="True" Checked="RadioButton_SHA256_Checked"/>
             <RadioButton x:Name="radioButton_SHA512" Content="SHA512" Margin="10,0,0,0" Checked="RadioButton_SHA512_Checked"/>
         </StackPanel>
-        <Button Grid.Row="6" Grid.Column="2" x:Name="button_CompareHash" HorizontalAlignment="Right" Margin="0,0,10,0" Width="80"
-                Content="比较哈希值" Click="Button_CompareHash_Click" />
-        <Button Grid.Row="6" Grid.Column="4" x:Name="button_GetHash"
+        <Button Grid.Row="6" Grid.Column="2" x:Name="button_GetHash" HorizontalAlignment="Right" Margin="0,0,10,0" Width="80"
                 Content="打开文件" Click="Button_GetHash_Click" />
-
+        <Button Grid.Row="6" Grid.Column="4" x:Name="button_CompareHash"
+                Content="比较哈希值" Click="Button_CompareHash_Click" />
     </Grid>
 </Window>
