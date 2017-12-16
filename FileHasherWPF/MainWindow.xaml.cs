@@ -124,7 +124,7 @@ namespace FileHasherWPF
         //    e.Handled = true;
         //    e.Effects = DragDropEffects.Copy;
         //}
-        private void DropStringOrFiles(object sender, DragEventArgs e)
+        private void DropFiles(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {

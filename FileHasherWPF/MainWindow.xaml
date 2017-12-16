@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FileHasherWPF"
         mc:Ignorable="d"
         Title="File Hasher WPF" Topmost="True" Height="310" Width="700" MinHeight="310" MinWidth="680"
-        AllowDrop="True" Drop="DropStringOrFiles">
+        AllowDrop="True" Drop="DropFiles">
     <Grid x:Name="MainGrid" Margin="5">
         <!--定义行-->
         <!--Auto表示根据内容设定大小，*表示根据空间填充大小-->
