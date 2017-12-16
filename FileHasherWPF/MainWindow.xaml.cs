@@ -118,20 +118,26 @@ namespace FileHasherWPF
             }
         }
 
-        // 拖放文件或字符串到窗口
+        // 拖放文件到窗口
         private void OnDragEnter(object sender, DragEventArgs e)
         {
-
-            //e.Handled = true;
-            //e.Effects = DragDropEffects.Copy;
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                DropOverlay.Visibility = Visibility.Visible;
+            }
         }
         private void OnFilesDrop(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                DropOverlay.Visibility = Visibility.Hidden;
                 HashFiles(files);
             }
+        }
+        private void OnDragLeave(object sender, DragEventArgs e)
+        {
+            DropOverlay.Visibility = Visibility.Hidden;
         }
         #endregion
 
