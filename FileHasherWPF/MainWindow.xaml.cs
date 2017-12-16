@@ -34,6 +34,9 @@ namespace FileHasherWPF
         public MainWindow()
         {
             InitializeComponent();
+#if DEBUG
+            Topmost = false;
+#endif
         }
 
         #region ViewModel
