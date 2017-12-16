@@ -28,6 +28,8 @@ namespace FileHasherWPF
         private bool firstClick = true;
         // 是否显示完整的路径
         private bool isFullPath;
+        // 获取环境换行符
+        private static string nl = Environment.NewLine;
 
         public MainWindow()
         {
@@ -54,13 +56,19 @@ namespace FileHasherWPF
                 {
                     textBox_HashCode.Text = result.hash;
                 }
-                textBox_Stream.Text += result.path + "\r\n" + result.hash + "\r\n\r\n";
+                textBox_Stream.Text += result.path + nl + result.hash + nl + nl;
                 // 滚动到最后一行
                 textBox_Stream.Focus();
                 textBox_Stream.CaretIndex = textBox_Stream.Text.Length; // 插入光标到末尾
                 textBox_Stream.ScrollToEnd();
             }
         }
+
+        private void Button_Stop_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        //async Task<GetHash.FileResult>
 
         // 文本框的首次清空
         public void FirstClear()
@@ -84,21 +92,23 @@ namespace FileHasherWPF
 
         #region View
         // 文本框键入
-        private void textBox_Stream_GotFocus(object sender, RoutedEventArgs e)
+        private void TextBox_Stream_GotFocus(object sender, RoutedEventArgs e)
         {
             FirstClear();
         }
-        private void textBox_Stream_TextChanged(object sender, TextChangedEventArgs e)
+        private void TextBox_Stream_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (textBox_Stream.IsFocused)
                 HashText();
         }
 
         // 打开文件对话框
-        private void button_GetHash_Click(object sender, RoutedEventArgs e)
+        private void Button_GetHash_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Multiselect = true;
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Multiselect = true
+            };
             if (openFileDialog.ShowDialog() == true)
             {
                 HashFiles(openFileDialog.FileNames);
@@ -127,12 +137,12 @@ namespace FileHasherWPF
 
         #region 其它按钮的逻辑
         // 复制到剪贴板
-        private void button_Copy_Click(object sender, RoutedEventArgs e)
+        private void Button_Copy_Click(object sender, RoutedEventArgs e)
         {
             Clipboard.SetText(textBox_HashCode.Text);
         }
         // 从剪贴板粘贴
-        private void button_Paste_Click(object sender, RoutedEventArgs e)
+        private void Button_Paste_Click(object sender, RoutedEventArgs e)
         {
             string text = Clipboard.GetText();
             if (text != null)
@@ -146,7 +156,7 @@ namespace FileHasherWPF
         }
 
         // 对比两个文本框的内容
-        private void button_CompareHash_Click(object sender, RoutedEventArgs e)
+        private void Button_CompareHash_Click(object sender, RoutedEventArgs e)
         {
             string a = textBox_HashCode.Text;
             string b = textBox_HashCodeForCompare.Text;
@@ -160,7 +170,7 @@ namespace FileHasherWPF
         }
 
         // 清空文本框
-        private void button_Clear_Click(object sender, RoutedEventArgs e)
+        private void Button_Clear_Click(object sender, RoutedEventArgs e)
         {
             textBox_Stream.Text = "";
             textBox_HashCodeForCompare.Text = "";
@@ -169,22 +179,22 @@ namespace FileHasherWPF
         #endregion
 
         #region 单选框的逻辑
-        private void radioButton_MD5_Checked(object sender, RoutedEventArgs e)
+        private void RadioButton_MD5_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 32;
             hashType = "MD5";
         }
-        private void radioButton_SHA1_Checked(object sender, RoutedEventArgs e)
+        private void RadioButton_SHA1_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 40;
             hashType = "SHA1";
         }
-        private void radioButton_SHA256_Checked(object sender, RoutedEventArgs e)
+        private void RadioButton_SHA256_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 64;
             hashType = "SHA256";
         }
-        private void radioButton_SHA512_Checked(object sender, RoutedEventArgs e)
+        private void RadioButton_SHA512_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 128;
             hashType = "SHA512";
@@ -192,22 +202,22 @@ namespace FileHasherWPF
         #endregion
 
         #region 复选框的逻辑
-        private void checkBox_IsText_Checked(object sender, RoutedEventArgs e)
+        private void CheckBox_IsText_Checked(object sender, RoutedEventArgs e)
         {
             isTextMode = true;
             textBox_Stream.IsReadOnly = false;
             FirstClear();
         }
-        private void checkBox_IsText_Unchecked(object sender, RoutedEventArgs e)
+        private void CheckBox_IsText_Unchecked(object sender, RoutedEventArgs e)
         {
             isTextMode = false;
             textBox_Stream.IsReadOnly = true;
         }
-        private void checkBox_IsFullPath_Checked(object sender, RoutedEventArgs e)
+        private void CheckBox_IsFullPath_Checked(object sender, RoutedEventArgs e)
         {
             isFullPath = true;
         }
-        private void checkBox_IsFullPath_Unchecked(object sender, RoutedEventArgs e)
+        private void CheckBox_IsFullPath_Unchecked(object sender, RoutedEventArgs e)
         {
             isFullPath = false;
         }
