@@ -33,29 +33,32 @@
 
         <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Top"
                    Text="字符串"/>
-
-        <!--第二按钮参考：Height="25" Margin="0,53,0,0"-->
-        <Button Grid.Row="0" Grid.Column="0" x:Name="button_Clear" VerticalAlignment="Top" Height="30" Margin="0,22,0,0"
-                Content="清空" Visibility="Visible" Click="Button_Clear_Click"/>
-        <Button Grid.Row="0" Grid.Column="0" x:Name="button_Stop" VerticalAlignment="Top" Height="30" Margin="0,22,0,0"
-                Content="停止" Visibility="Hidden" Click="Button_Stop_Click"/>
-        <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Margin="0,85,0,0"
-                  x:Name="checkBox_IsText" Content="校验&#xD;&#xA;文本" Checked="CheckBox_IsText_Checked" Unchecked="CheckBox_IsText_Unchecked"/>
-        <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Margin="0,120,0,0"
-                  x:Name="checkBox_IsFullPath" Content="完整&#xD;&#xA;路径" Checked="CheckBox_IsFullPath_Checked" Unchecked="CheckBox_IsFullPath_Unchecked"/>
+        <Button Grid.Row="0" Grid.Column="0" x:Name="button_Clear"
+                VerticalAlignment="Top" Height="30" Margin="0,22,0,0"
+                Content="清空" Click="Button_Clear_Click"/>
+        <Button Grid.Row="0" Grid.Column="0" x:Name="button_Stop"
+                VerticalAlignment="Top" Height="25" Margin="0,58,0,0"
+                Content="停止" Click="Button_Stop_Click" IsEnabled="False" IsCancel="True"/>
+        <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Margin="0,90,0,0"
+                  x:Name="checkBox_IsText" Content="校验&#xD;&#xA;文本"
+                  Checked="CheckBox_IsText_Checked" Unchecked="CheckBox_IsText_Unchecked"/>
+        <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Margin="0,125,0,0"
+                  x:Name="checkBox_IsFullPath" Content="完整&#xD;&#xA;路径"
+                  Checked="CheckBox_IsFullPath_Checked" Unchecked="CheckBox_IsFullPath_Unchecked"/>
         <TextBox Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3" x:Name="textBox_Stream"
                  IsReadOnly="True" IsReadOnlyCaretVisible="True" TextWrapping="NoWrap"
                  AcceptsReturn="True" ScrollViewer.CanContentScroll="True"
                  ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"
                  Text="直接将文件拖入窗口即可计算哈希值&#xD;&#xA;支持多个文件&#xD;&#xA;在下方选择校验类型"
                  TextChanged="TextBox_Stream_TextChanged" GotFocus="TextBox_Stream_GotFocus"/>
+        <ProgressBar Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3" x:Name="progressBar"
+                     Height="25" VerticalAlignment="Bottom" Value="50"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="哈希值"
                    VerticalAlignment="Center"/>
         <TextBox Grid.Row="2" Grid.Column="2" x:Name="textBox_HashCode" IsReadOnly="True"
                  FontFamily="Consolas" FontWeight="Bold" FontSize="14"
-                 MaxLines="1" Background="#FFEEEEEE" Visibility="Visible"/>
-        <ProgressBar Grid.Row="2" Grid.Column="2" x:Name="progressBar" Visibility="Hidden"/>
+                 MaxLines="1" Background="#FFEEEEEE"/>
         <Button Grid.Row="2" Grid.Column="4" x:Name="button_Copy"
                 Content="复制" Click="Button_Copy_Click"/>
 
@@ -71,18 +74,24 @@
                    VerticalAlignment="Center"/>
         <StackPanel Grid.Row="6" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"
                     Orientation="Horizontal">
-            <RadioButton x:Name="radioButton_MD5" Content="MD5" Margin="5,0,0,0" Checked="RadioButton_MD5_Checked"/>
-            <RadioButton x:Name="radioButton_SHA1" Content="SHA1" Margin="15,0,0,0" Checked="RadioButton_SHA1_Checked"/>
-            <RadioButton x:Name="radioButton_SHA256" Content="SHA256" Margin="15,0,0,0" IsChecked="True" Checked="RadioButton_SHA256_Checked"/>
-            <RadioButton x:Name="radioButton_SHA512" Content="SHA512" Margin="10,0,0,0" Checked="RadioButton_SHA512_Checked"/>
+            <RadioButton x:Name="radioButton_MD5" Content="MD5" Margin="5,0,0,0"
+                         Checked="RadioButton_MD5_Checked"/>
+            <RadioButton x:Name="radioButton_SHA1" Content="SHA1" Margin="15,0,0,0"
+                         Checked="RadioButton_SHA1_Checked"/>
+            <RadioButton x:Name="radioButton_SHA256" Content="SHA256" Margin="15,0,0,0"
+                         IsChecked="True" Checked="RadioButton_SHA256_Checked"/>
+            <RadioButton x:Name="radioButton_SHA512" Content="SHA512" Margin="10,0,0,0"
+                         Checked="RadioButton_SHA512_Checked"/>
         </StackPanel>
-        <Button Grid.Row="6" Grid.Column="2" x:Name="button_GetHash" HorizontalAlignment="Right" Margin="0,0,10,0" Width="80"
+        <Button Grid.Row="6" Grid.Column="2" x:Name="button_GetHash"
+                HorizontalAlignment="Right" Margin="0,0,10,0" Width="80"
                 Content="打开文件" Click="Button_GetHash_Click"/>
         <Button Grid.Row="6" Grid.Column="4" x:Name="button_CompareHash"
                 Content="比较哈希值" Click="Button_CompareHash_Click"/>
         <!--WPF中元素显示层级是按文档自下而上（自新而旧）的，所以以下组件不需额外设置属性，天然显示在顶层-->
-        <Label x:Name="DropOverlay" Grid.RowSpan="7" Grid.ColumnSpan="5" Margin="-5"
+        <Label x:Name="dropOverlay" Grid.RowSpan="7" Grid.ColumnSpan="5" Margin="-5"
                Background="#CC000000" Foreground="White" Visibility="Hidden"
-               Content="松开鼠标开始计算文件哈希值" FontSize="24" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+               Content="松开鼠标开始计算文件哈希值"
+               FontSize="24" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
     </Grid>
 </Window>
