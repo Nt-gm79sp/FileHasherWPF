@@ -41,37 +41,54 @@ namespace FileHasherWPF
 
         #region ViewModel
         // 处理打开多个文件的逻辑控制
+        // 异步调用哈希算法，异步输出结果，避免死锁
+        // 使用TAP模式，避免EAP、APM模式
         private void HashFiles(string[] files)
         {
             if ((files == null) || (files.Length <= 0)) return;
             FirstClear();
-            var results = new GetHash.FileResult[files.Length];
-            Parallel.For(0, files.Length,
-                index =>
+            progressBar.Visibility= Visibility.Visible;
+            foreach (string f in files)
             {
-                results[index] = GetHash.GetFileHash(hashType, files[index], isFullPath);
-            });
-
-            foreach (var result in results)
-            {
-                // 显示文本
-                if (result.hash != GetHash.FILE_ERROR)
-                {
-                    textBox_HashCode.Text = result.hash;
-                }
-                textBox_Stream.Text += result.path + nl + result.hash + nl + nl;
-                // 滚动到最后一行
-                textBox_Stream.Focus();
-                textBox_Stream.CaretIndex = textBox_Stream.Text.Length; // 插入光标到末尾
-                textBox_Stream.ScrollToEnd();
+                //        Task.Run<HashFileAsync>(f);
             }
+            // 基于所有任务的进度条更新
+
+            // 滚动到最后一行
+            textBox_Stream.Focus();
+            textBox_Stream.CaretIndex = textBox_Stream.Text.Length; // 插入光标到末尾
+            textBox_Stream.ScrollToEnd();
+            button_Stop.IsEnabled = true;
         }
 
+        private async Task HashFileAsync(string file)
+        {
+#if DEBUG
+            var timer = new System.Diagnostics.Stopwatch();
+            timer.Start();
+#endif
+            var result = new GetHash.FileResult();
+            result = GetHash.GetFileHash(hashType, file, isFullPath);
+            // 显示文本
+            if (result.hash != GetHash.FILE_ERROR)
+            {
+                textBox_HashCode.Text = result.hash;
+            }
+#if DEBUG
+            timer.Stop();
+            textBox_Stream.Text += "耗时：" + timer.Elapsed.ToString();
+#endif
+            textBox_Stream.Text += result.path + nl + result.hash + nl + nl;
+
+
+        }
+
+        // 停止任务
         private void Button_Stop_Click(object sender, RoutedEventArgs e)
         {
-
+            progressBar.Visibility = Visibility.Collapsed;
+            button_Stop.IsEnabled = false;
         }
-        //async Task<GetHash.FileResult>
 
         // 文本框的首次清空
         public void FirstClear()
@@ -132,7 +149,7 @@ namespace FileHasherWPF
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                DropOverlay.Visibility = Visibility.Visible;
+                dropOverlay.Visibility = Visibility.Visible;
             }
         }
         private void OnFilesDrop(object sender, DragEventArgs e)
@@ -140,13 +157,13 @@ namespace FileHasherWPF
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                DropOverlay.Visibility = Visibility.Hidden;
+                dropOverlay.Visibility = Visibility.Hidden;
                 HashFiles(files);
             }
         }
         private void OnDragLeave(object sender, DragEventArgs e)
         {
-            DropOverlay.Visibility = Visibility.Hidden;
+            dropOverlay.Visibility = Visibility.Hidden;
         }
         #endregion
 
@@ -187,6 +204,7 @@ namespace FileHasherWPF
         // 清空文本框
         private void Button_Clear_Click(object sender, RoutedEventArgs e)
         {
+            // FirstClear()被包含在其它操作中，因此不再多写
             textBox_Stream.Text = "";
             textBox_HashCodeForCompare.Text = "";
             textBox_HashCode.Text = "";
@@ -221,6 +239,7 @@ namespace FileHasherWPF
         {
             isTextMode = true;
             textBox_Stream.IsReadOnly = false;
+            textBox_Stream.Focus();
             FirstClear();
         }
         private void CheckBox_IsText_Unchecked(object sender, RoutedEventArgs e)
@@ -235,6 +254,14 @@ namespace FileHasherWPF
         private void CheckBox_IsFullPath_Unchecked(object sender, RoutedEventArgs e)
         {
             isFullPath = false;
+        }
+        private void CheckBox_AlwaysOnTop_Checked(object sender, RoutedEventArgs e)
+        {
+            Topmost = true;
+        }
+        private void CheckBox_AlwaysOnTop_UnChecked(object sender, RoutedEventArgs e)
+        {
+            Topmost = false;
         }
         #endregion
     }
