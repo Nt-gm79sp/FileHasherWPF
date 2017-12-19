@@ -8,7 +8,10 @@ using System.IO;
 
 namespace Utils
 {
-    public static class GetHash
+    /// <summary>
+    /// 处理基本的字符串哈希与格式化
+    /// </summary>
+    public class GetHash
     {
         // 字符串
         public static string GetStringHash(string hashType, string s)
@@ -24,41 +27,8 @@ namespace Utils
             return FormatBytes(result);
         }
 
-        // 文件
-        public struct FileResult
-        {
-            public string path;
-            public string hash;
-        }
-        public const string FILE_ERROR = "文件读取错误！";
-
-        public static FileResult GetFileHash(string hashType, string filePath, bool isFullPath)
-        {
-            FileResult result;
-            try
-            {
-                // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
-                // 不必手动关闭文件流，读取过程中隐含了Dispose()方法。如果要写注意写在finally中
-                // 因为写在try中，所以不必using(){}的用法
-                FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                HashAlgorithm hashCode = HashAlgorithm.Create(hashType);
-                byte[] hashCodeBytes = hashCode.ComputeHash(fs);
-                result.hash = FormatBytes(hashCodeBytes);
-            }
-            catch
-            {
-                result.hash = FILE_ERROR;
-            }
-            finally
-            {
-                // 是否显示完整路径
-                result.path = isFullPath ? filePath : Path.GetFileName(filePath);
-            }
-            return result;
-        }
-
         // 将字节数组格式化到字符串
-        private static string FormatBytes(byte[] b)
+        protected static string FormatBytes(byte[] b)
         {
             // 该方法不是解码，而是将HEX“音译”到字符串，1A->"1A"
             string s = BitConverter.ToString(b);
@@ -66,4 +36,69 @@ namespace Utils
             return s;
         }
     }
+
+    /// <summary>
+    /// 处理文件哈希过程，并返回进度与结果
+    /// </summary>
+    public class GetFileHash : GetHash
+    {
+        public string HashType { get; }
+        public string FilePath { get; }
+
+        public string FileName { get; }
+        public long FileLength { get; }
+
+        // 基于文件读取进度的进度报告
+        public double Progress => fs.Length == 0 ? 100 : (fs.Position / fs.Length) * 100;
+
+        public string HashResult { get; private set; }
+
+        private FileStream fs;
+
+        public const string FILE_ERROR = "文件读取错误！";
+        public const string HASH_INCOMPL = "文件哈希取消";
+
+        /// <summary>
+        /// 进行文件哈希
+        /// </summary>
+        /// <param name="hashType">指定哈希类型，以字符串表示</param>
+        /// <param name="filePath">完整的文件路径</param>
+        public GetFileHash(string hashType, string filePath)
+        {
+            HashType = hashType;
+            FilePath = filePath;
+            FileName = Path.GetFileName(filePath);
+            HashResult = string.Empty;
+
+            if (File.Exists(FilePath))
+            {
+                try
+                {
+                    // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
+                    // 因为写在try中，所以不必using(){}的用法
+                    fs = File.OpenRead(FilePath);
+                    FileLength = fs.Length;
+                    HashAlgorithm hash = HashAlgorithm.Create(HashType);
+                    byte[] result = hash.ComputeHash(fs);
+                    HashResult = FormatBytes(result);
+                }
+                catch
+                {
+                    HashResult = FILE_ERROR;
+                    FileLength = 0L;
+                }
+                finally
+                {
+                    // 读取过程中并不隐含Dispose()方法，但是GC会自动回收（有延迟）
+                    fs?.Dispose();
+                }
+            }
+            else
+            {
+                HashResult = FILE_ERROR;
+            }
+        }
+
+    }
+
 }
