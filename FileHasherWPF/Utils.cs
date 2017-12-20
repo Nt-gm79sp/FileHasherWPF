@@ -44,19 +44,30 @@ namespace Utils
     {
         public string HashType { get; }
         public string FilePath { get; }
-
         public string FileName { get; }
         public long FileLength { get; }
-
-        // 基于文件读取进度的进度报告
-        public double Progress => fs.Length == 0 ? 100 : (fs.Position / fs.Length) * 100;
-
         public string HashResult { get; private set; }
 
-        private FileStream fs;
+        private FileStream FS { get; }
 
         public const string FILE_ERROR = "文件读取错误！";
-        public const string HASH_INCOMPL = "文件哈希取消";
+        public const string HASH_INCOMPL = "已取消文件读取";
+
+        // 文件的读取进度
+        // 无法直接得知IDisposable是否已被Dispose()，可catch异常，或额外用个bool挂旗
+        public long GetCurrentBytesPosition()
+        {
+            try
+            {
+                return FS.Position;
+                // 直接用ProgressBar的最大值来设置了，就不换算百分比了
+                // return FileLength == 0 ? 100 : (fs.Position / FileLength) * 100;
+            }
+            catch
+            {
+                return FileLength;
+            }
+        }
 
         /// <summary>
         /// 进行文件哈希
@@ -67,8 +78,9 @@ namespace Utils
         {
             HashType = hashType;
             FilePath = filePath;
+            // 获取文件名是纯字符串操作，不会抛出文件系统异常。错误的文件名返回空串
             FileName = Path.GetFileName(filePath);
-            HashResult = string.Empty;
+            HashResult = HASH_INCOMPL;
 
             if (File.Exists(FilePath))
             {
@@ -76,10 +88,10 @@ namespace Utils
                 {
                     // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
                     // 因为写在try中，所以不必using(){}的用法
-                    fs = File.OpenRead(FilePath);
-                    FileLength = fs.Length;
+                    FS = File.OpenRead(FilePath);
+                    FileLength = FS.Length;
                     HashAlgorithm hash = HashAlgorithm.Create(HashType);
-                    byte[] result = hash.ComputeHash(fs);
+                    byte[] result = hash.ComputeHash(FS);
                     HashResult = FormatBytes(result);
                 }
                 catch
@@ -90,7 +102,7 @@ namespace Utils
                 finally
                 {
                     // 读取过程中并不隐含Dispose()方法，但是GC会自动回收（有延迟）
-                    fs?.Dispose();
+                    FS?.Dispose();
                 }
             }
             else
@@ -98,7 +110,16 @@ namespace Utils
                 HashResult = FILE_ERROR;
             }
         }
-
+        // 另一种Dispose方式，带个bool
+        //class MyClient : TcpClient
+        //{
+        //    public bool IsDead { get; set; }
+        //    protected override void Dispose(bool disposing)
+        //    {
+        //        IsDead = true;
+        //        base.Dispose(disposing);
+        //    }
+        //}
     }
 
 }
