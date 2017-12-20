@@ -73,7 +73,7 @@ namespace Utils
         }
 
         /// <summary>
-        /// 初始化文件哈希参数
+        /// 进行文件哈希计算
         /// </summary>
         /// <param name="hashType">指定哈希类型，以字符串表示</param>
         /// <param name="filePath">文件路径</param>
