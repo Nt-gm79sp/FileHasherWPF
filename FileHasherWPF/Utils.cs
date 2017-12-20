@@ -113,7 +113,6 @@ namespace Utils
                 HashResult = FILE_ERROR;
             }
         }
-
     }
 
 }
