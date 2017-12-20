@@ -11,7 +11,7 @@ namespace Utils
     /// <summary>
     /// 处理基本的字符串哈希与格式化
     /// </summary>
-    public class GetHash
+    public static class GetHash
     {
         // 字符串
         public static string GetStringHash(string hashType, string s)
@@ -28,7 +28,7 @@ namespace Utils
         }
 
         // 将字节数组格式化到字符串
-        protected static string FormatBytes(byte[] b)
+        public static string FormatBytes(byte[] b)
         {
             // 该方法不是解码，而是将HEX“音译”到字符串，1A->"1A"
             string s = BitConverter.ToString(b);
@@ -40,23 +40,26 @@ namespace Utils
     /// <summary>
     /// 处理文件哈希过程，并返回进度与结果
     /// </summary>
-    public class GetFileHash : GetHash
+    public class GetFileHash
     {
         public string HashType { get; }
         public string FilePath { get; }
         public string FileName { get; }
         public long FileLength { get; }
-        public string HashResult { get; private set; }
-
-        private FileStream FS { get; }
+        public string HashResult { get; }
 
         public const string FILE_ERROR = "文件读取错误！";
         public const string HASH_INCOMPL = "已取消文件读取";
 
-        // 文件的读取进度
-        // 无法直接得知IDisposable是否已被Dispose()，可catch异常，或额外用个bool挂旗
+        private FileStream FS { get; }
+
+        /// <summary>
+        /// 获取当前文件读取字节位置，如异常则返回文件长度（默认为0）
+        /// </summary>
         public long GetCurrentBytesPosition()
         {
+            // 无法直接得知IDisposable是否已被Dispose()，可catch异常，
+            // 或额外用个bool挂旗，或进一步override Dispose()方法等
             try
             {
                 return FS.Position;
@@ -70,10 +73,10 @@ namespace Utils
         }
 
         /// <summary>
-        /// 进行文件哈希
+        /// 初始化文件哈希参数
         /// </summary>
         /// <param name="hashType">指定哈希类型，以字符串表示</param>
-        /// <param name="filePath">完整的文件路径</param>
+        /// <param name="filePath">文件路径</param>
         public GetFileHash(string hashType, string filePath)
         {
             HashType = hashType;
@@ -92,7 +95,7 @@ namespace Utils
                     FileLength = FS.Length;
                     HashAlgorithm hash = HashAlgorithm.Create(HashType);
                     byte[] result = hash.ComputeHash(FS);
-                    HashResult = FormatBytes(result);
+                    HashResult = GetHash.FormatBytes(result);
                 }
                 catch
                 {
@@ -110,16 +113,7 @@ namespace Utils
                 HashResult = FILE_ERROR;
             }
         }
-        // 另一种Dispose方式，带个bool
-        //class MyClient : TcpClient
-        //{
-        //    public bool IsDead { get; set; }
-        //    protected override void Dispose(bool disposing)
-        //    {
-        //        IsDead = true;
-        //        base.Dispose(disposing);
-        //    }
-        //}
+
     }
 
 }
