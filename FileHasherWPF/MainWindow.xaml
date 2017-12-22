@@ -54,12 +54,12 @@
                             Click="Button_Stop_Click" />
                     <CheckBox x:Name="checkBox_IsText"
                               Margin="0,8,0,0"
-                              Content="校验&#xD;&#xA;文本"
+                              Content="校验&#xA;文本"
                               Checked="CheckBox_IsText_Checked"
                               Unchecked="CheckBox_IsText_Unchecked" />
                     <CheckBox x:Name="checkBox_IsFullPath"
                               Margin="0,2,0,0"
-                              Content="完整&#xD;&#xA;路径"
+                              Content="完整&#xA;路径"
                               Checked="CheckBox_IsFullPath_Checked"
                               Unchecked="CheckBox_IsFullPath_Unchecked" />
                 </StackPanel>
@@ -81,14 +81,15 @@
                          ScrollViewer.CanContentScroll="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                         Text="直接将文件拖入窗口即可计算哈希值&#xD;&#xA;支持多个文件&#xD;&#xA;在下方选择校验类型"
+                         Text="直接将文件拖入窗口即可计算哈希值&#xA;支持多个文件&#xA;在下方选择校验类型"
                          TextChanged="TextBox_Stream_TextChanged"
                          GotFocus="TextBox_Stream_GotFocus" />
                 <ProgressBar Grid.Row="1"
                              x:Name="progressBar"
                              Height="25"
-                             VerticalAlignment="Bottom"
-                             Visibility="Collapsed" />
+                             Visibility="Collapsed"
+                             Maximum="0"
+                             Value="0" />
             </Grid>
         </Grid>
 
