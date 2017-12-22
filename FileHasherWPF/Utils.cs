@@ -42,8 +42,6 @@ namespace Utils
     /// </summary>
     public class GetFileHash
     {
-        public string HashType { get; }
-        public string FilePath { get; }
         public string FileName { get; }
         public long FileLength { get; }
         public string HashResult { get; }
@@ -63,8 +61,6 @@ namespace Utils
             try
             {
                 return FS.Position;
-                // 直接用ProgressBar的最大值来设置了，就不换算百分比了
-                // return FileLength == 0 ? 100 : (fs.Position / FileLength) * 100;
             }
             catch
             {
@@ -79,40 +75,31 @@ namespace Utils
         /// <param name="filePath">文件路径</param>
         public GetFileHash(string hashType, string filePath)
         {
-            HashType = hashType;
-            FilePath = filePath;
             // 获取文件名是纯字符串操作，不会抛出文件系统异常。错误的文件名返回空串
             FileName = Path.GetFileName(filePath);
             HashResult = HASH_INCOMPL;
-
-            if (File.Exists(FilePath))
+            try
             {
-                try
-                {
-                    // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
-                    // 因为写在try中，所以不必using(){}的用法
-                    FS = File.OpenRead(FilePath);
-                    FileLength = FS.Length;
-                    HashAlgorithm hash = HashAlgorithm.Create(HashType);
-                    byte[] result = hash.ComputeHash(FS);
-                    HashResult = GetHash.FormatBytes(result);
-                }
-                catch
-                {
-                    HashResult = FILE_ERROR;
-                    FileLength = 0L;
-                }
-                finally
-                {
-                    // 读取过程中并不隐含Dispose()方法，但是GC会自动回收（有延迟）
-                    FS?.Dispose();
-                }
+                // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
+                // 因为写在try中，所以不必using(){}的用法
+                FS = File.OpenRead(filePath);
+                FileLength = FS.Length;
+                HashAlgorithm hash = HashAlgorithm.Create(hashType);
+                byte[] result = hash.ComputeHash(FS);
+                HashResult = GetHash.FormatBytes(result);
             }
-            else
+            catch
             {
                 HashResult = FILE_ERROR;
+                FileLength = 0L;
+            }
+            finally
+            {
+                // 读取过程中并不隐含Dispose()方法，但是GC会自动回收（有延迟）
+                FS?.Dispose();
             }
         }
+
     }
 
 }
