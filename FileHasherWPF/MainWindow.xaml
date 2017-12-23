@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileHasherWPF"
+        xmlns:System="clr-namespace:System;assembly=mscorlib" 
         mc:Ignorable="d"
-        Title="File Hasher WPF"
+        Title="{DynamicResource STR_WINDOW_TITLE}"
         Topmost="True"
         Height="310"
         Width="700"
@@ -15,6 +16,25 @@
         Drop="OnFilesDrop"
         PreviewDragEnter="OnDragEnter"
         DragLeave="OnDragLeave">
+    <Window.Resources>
+        <System:String x:Key="STR_WINDOW_TITLE">File Hasher WPF</System:String>
+        <System:String x:Key="STR_OUTPUT">输出</System:String>
+        <System:String x:Key="STR_STRINGS">字符串</System:String>
+        <System:String x:Key="STR_CLEAR">清空</System:String>
+        <System:String x:Key="STR_STOP">停止</System:String>
+        <System:String x:Key="STR_HASH_TEXT" xml:space="preserve">校验&#xA;文本</System:String>
+        <System:String x:Key="STR_FULL_PATH" xml:space="preserve">完整&#xA;路径</System:String>
+        <System:String x:Key="STR_HASHCODE">哈希值</System:String>
+        <System:String x:Key="STR_VALUE_FOR_COMPARE">对照值</System:String>
+        <System:String x:Key="STR_HASH_TYPE">校验类型</System:String>
+        <System:String x:Key="STR_WELCOME_TEXT" xml:space="preserve">直接将文件拖入窗口即可计算哈希值&#xA;支持多个文件&#xA;在下方选择校验类型</System:String>
+        <System:String x:Key="STR_COPY">复制</System:String>
+        <System:String x:Key="STR_PASTE">粘贴</System:String>
+        <System:String x:Key="STR_ALWAYS_ON_TOP">总在最前</System:String>
+        <System:String x:Key="STR_OPEN_FILE">打开文件</System:String>
+        <System:String x:Key="STR_COMPARE_HASHCODES">比较哈希值</System:String>
+        <System:String x:Key="STR_RELEASE_TO_HASH_FILES">松开鼠标开始计算文件哈希值</System:String>
+    </Window.Resources>
     <Grid x:Name="MainGrid"
           Margin="5">
         <!--定义行-->
@@ -39,29 +59,28 @@
             <Grid x:Name="UpperLeftGrid"
                   Grid.Column="0">
                 <StackPanel>
-                    <TextBlock Text="字符串" />
+                    <TextBlock x:Name="textBlock_Info"
+                        Text="{DynamicResource STR_OUTPUT}" />
                     <Button x:Name="button_Clear"
                             Height="30"
                             Margin="0,5,0,0"
-                            Content="清空"
+                            Content="{DynamicResource STR_CLEAR}"
                             Click="Button_Clear_Click" />
                     <Button x:Name="button_Stop"
                             Height="25"
                             Margin="0,8,0,0"
-                            Content="停止"
+                            Content="{DynamicResource STR_STOP}"
                             IsEnabled="False"
                             IsCancel="True"
-                            Click="Button_Stop_Click" />
+                            Click="Button_Stop_Click"/>
                     <CheckBox x:Name="checkBox_IsText"
                               Margin="0,8,0,0"
-                              Content="校验&#xA;文本"
+                              Content="{DynamicResource STR_HASH_TEXT}"
                               Checked="CheckBox_IsText_Checked"
                               Unchecked="CheckBox_IsText_Unchecked" />
                     <CheckBox x:Name="checkBox_IsFullPath"
                               Margin="0,2,0,0"
-                              Content="完整&#xA;路径"
-                              Checked="CheckBox_IsFullPath_Checked"
-                              Unchecked="CheckBox_IsFullPath_Unchecked" />
+                              Content="{DynamicResource STR_FULL_PATH}" />
                 </StackPanel>
             </Grid>
 
@@ -81,15 +100,13 @@
                          ScrollViewer.CanContentScroll="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                         Text="直接将文件拖入窗口即可计算哈希值&#xA;支持多个文件&#xA;在下方选择校验类型"
+                         Text="{DynamicResource STR_WELCOME_TEXT}"
                          TextChanged="TextBox_Stream_TextChanged"
                          GotFocus="TextBox_Stream_GotFocus" />
                 <ProgressBar Grid.Row="1"
                              x:Name="progressBar"
                              Height="25"
-                             Visibility="Collapsed"
-                             Maximum="0"
-                             Value="0" />
+                             Visibility="Collapsed" />
             </Grid>
         </Grid>
 
@@ -118,7 +135,7 @@
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
-                           Text="哈希值"
+                           Text="{DynamicResource STR_HASHCODE}"
                            VerticalAlignment="Center" />
                 <TextBox Grid.Row="0"
                          Grid.Column="2"
@@ -132,12 +149,12 @@
                 <Button Grid.Row="0"
                         Grid.Column="4"
                         x:Name="button_Copy"
-                        Content="复制"
+                        Content="{DynamicResource STR_COPY}"
                         Click="Button_Copy_Click" />
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
-                           Text="对照值"
+                           Text="{DynamicResource STR_VALUE_FOR_COMPARE}"
                            VerticalAlignment="Center" />
                 <TextBox Grid.Row="2"
                          Grid.Column="2"
@@ -149,7 +166,7 @@
                 <Button Grid.Row="2"
                         Grid.Column="4"
                         x:Name="button_Paste"
-                        Content="粘贴"
+                        Content="{DynamicResource STR_PASTE}"
                         Click="Button_Paste_Click" />
             </Grid>
 
@@ -165,7 +182,7 @@
                     <ColumnDefinition Width="80" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
-                           Text="校验类型"
+                           Text="{DynamicResource STR_HASH_TYPE}"
                            VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
@@ -193,17 +210,15 @@
                           x:Name="checkBox_AlwaysOnTop"
                           HorizontalAlignment="Left"
                           VerticalAlignment="Center"
-                          Content="总在最前"
-                          IsChecked="True"
-                          Checked="CheckBox_AlwaysOnTop_Checked"
-                          Unchecked="CheckBox_AlwaysOnTop_UnChecked" />
+                          Content="{DynamicResource STR_ALWAYS_ON_TOP}"
+                          IsChecked="{Binding MainWindow.Topmost, Mode=TwoWay, Source={x:Static Application.Current}}" />
                 <Button Grid.Column="3"
                         x:Name="button_GetHash"
-                        Content="打开文件"
+                        Content="{DynamicResource STR_OPEN_FILE}"
                         Click="Button_GetHash_Click" />
                 <Button Grid.Column="5"
                         x:Name="button_CompareHash"
-                        Content="比较哈希值"
+                        Content="{DynamicResource STR_COMPARE_HASHCODES}"
                         Click="Button_CompareHash_Click" />
             </Grid>
         </Grid>
@@ -215,7 +230,7 @@
                Visibility="Hidden"
                Background="#CC000000"
                Foreground="White"
-               Content="松开鼠标开始计算文件哈希值"
+               Content="{DynamicResource STR_RELEASE_TO_HASH_FILES}"
                FontSize="24"
                VerticalContentAlignment="Center"
                HorizontalContentAlignment="Center" />

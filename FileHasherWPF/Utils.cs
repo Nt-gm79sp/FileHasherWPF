@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
@@ -8,6 +6,16 @@ using System.IO;
 
 namespace Utils
 {
+    public static class ConstStrings
+    {
+        public const string FILE_ERROR = "文件读取错误！";
+        public const string HASH_INCOMPL = "已取消文件读取";
+        public const string HASH_EQUAL = "校验值相同";
+        public const string SUCCESS = "恭喜";
+        public const string HASH_UNEQUAL = "校验值不同！";
+        public const string CAUTION = "注意！";
+    }
+
     /// <summary>
     /// 处理基本的字符串哈希与格式化
     /// </summary>
@@ -42,14 +50,66 @@ namespace Utils
     /// </summary>
     public class GetFileHash
     {
+        public string FilePath { get; }
         public string FileName { get; }
         public long FileLength { get; }
-        public string HashResult { get; }
-
-        public const string FILE_ERROR = "文件读取错误！";
-        public const string HASH_INCOMPL = "已取消文件读取";
+        public string HashType { get; }
+        public string HashResult { get; private set; }
 
         private FileStream FS { get; }
+
+        private const string FILE_ERROR = ConstStrings.FILE_ERROR;
+        private const string HASH_INCOMPL = ConstStrings.HASH_INCOMPL;
+
+        /// <summary>
+        /// 初始化文件哈希计算
+        /// </summary>
+        /// <param name="hashType">指定哈希类型，以字符串表示</param>
+        /// <param name="filePath">文件路径</param>
+        public GetFileHash(string hashType, string filePath)
+        {
+            FilePath = filePath;
+            HashType = hashType;
+            // 获取文件名是纯字符串操作，不会抛出文件系统异常。错误的文件名返回空串
+            FileName = Path.GetFileName(filePath);
+            HashResult = HASH_INCOMPL;
+            try
+            {
+                // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
+                // 因为写在try中，所以不必using(){}的用法，但需要注意Dispose()
+                FS = File.OpenRead(filePath);
+                //FS = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+                FileLength = FS.Length;
+            }
+            catch
+            {
+                HashResult = FILE_ERROR;
+                FileLength = 0L;
+                // 读取过程中并不隐含Dispose()方法，但是GC会自动回收（有延迟）
+                FS?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// 开始计算文件哈希值
+        /// </summary>
+        public async Task StartHash()
+        {
+            if (FS != null && HashResult != FILE_ERROR)
+            {
+                try
+                {
+                    // 异步的标准用法之一，很关键哦
+                    await Task.Run(() =>
+                    {
+                        HashAlgorithm hash = HashAlgorithm.Create(HashType);
+                        byte[] result = hash.ComputeHash(FS);
+                        HashResult = GetHash.FormatBytes(result);
+                    });
+                }
+                finally { FS?.Dispose(); }
+            }
+        }
 
         /// <summary>
         /// 获取当前文件读取字节位置，如异常则返回文件长度（默认为0）
@@ -65,38 +125,6 @@ namespace Utils
             catch
             {
                 return FileLength;
-            }
-        }
-
-        /// <summary>
-        /// 进行文件哈希计算
-        /// </summary>
-        /// <param name="hashType">指定哈希类型，以字符串表示</param>
-        /// <param name="filePath">文件路径</param>
-        public GetFileHash(string hashType, string filePath)
-        {
-            // 获取文件名是纯字符串操作，不会抛出文件系统异常。错误的文件名返回空串
-            FileName = Path.GetFileName(filePath);
-            HashResult = HASH_INCOMPL;
-            try
-            {
-                // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
-                // 因为写在try中，所以不必using(){}的用法
-                FS = File.OpenRead(filePath);
-                FileLength = FS.Length;
-                HashAlgorithm hash = HashAlgorithm.Create(hashType);
-                byte[] result = hash.ComputeHash(FS);
-                HashResult = GetHash.FormatBytes(result);
-            }
-            catch
-            {
-                HashResult = FILE_ERROR;
-                FileLength = 0L;
-            }
-            finally
-            {
-                // 读取过程中并不隐含Dispose()方法，但是GC会自动回收（有延迟）
-                FS?.Dispose();
             }
         }
 
