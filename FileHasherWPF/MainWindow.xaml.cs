@@ -65,7 +65,6 @@ namespace FileHasherWPF
             timer.Stop(); textBox_Stream.AppendText("耗时：" + timer.Elapsed.TotalMilliseconds + "ms" + nl + nl);
 #endif
         }
-
         // 输出结果
         private void AddResult(GetFileHash result)
         {
@@ -88,6 +87,7 @@ namespace FileHasherWPF
             }
             SetGUIIdle(); //此句冗余，仅为了GUI更快响应
         }
+
         // 任务开始与停止时更新GUI
         // 另外：异步线程一般无法直接往UI线程写入，且应避免从UI线程读
         // 另外：使用Dispatcher来防止阻塞UI是个坏习惯
@@ -217,13 +217,15 @@ namespace FileHasherWPF
         // 复制到剪贴板
         private void Button_Copy_Click(object sender, RoutedEventArgs e)
         {
-            Clipboard.SetText(textBox_HashCode.Text);
+            string text = textBox_HashCode.Text;
+            if (text != string.Empty)
+                Clipboard.SetText(text);
         }
         // 从剪贴板粘贴
         private void Button_Paste_Click(object sender, RoutedEventArgs e)
         {
             string text = Clipboard.GetText();
-            if (text != null)
+            if (text != null && text != string.Empty)
             {
                 // 去除无关符号
                 text = text.Replace(" ", string.Empty);
