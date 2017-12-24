@@ -33,7 +33,7 @@ namespace FileHasherWPF
         List<GetFileHash> hashList = new List<GetFileHash>();
         long totalFileBytes = 0L;
         long currentFileBytes = 0L;
-        bool isProcessing = false;
+        bool isProcessing = false; // 文件大小有可能为0，不宜用于判断任务状态，虽然巧妙但容易出错
 
         // 处理打开多个文件的逻辑控制
         // 异步调用哈希算法，异步输出结果，避免死锁

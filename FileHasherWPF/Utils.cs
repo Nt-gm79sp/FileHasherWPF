@@ -123,7 +123,8 @@ namespace Utils
             // 这里的写法非常简单粗暴，直接关闭文件流，忽略异常
             // 正常的写法应当是使用 CancellationTokenSource 及其 Token，
             // 在循环中使用buffer读取文件，在CTS.Cancel()后跳出循环
-            FS?.Dispose();
+            if (FS != null && HashResult == HASH_INCOMPL)
+                FS.Dispose();
         }
 
         /// <summary>
