@@ -97,18 +97,33 @@ namespace Utils
         {
             if (FS != null && HashResult != FILE_ERROR)
             {
-                try
+                // 异步的标准用法之一，很关键哦
+                await Task.Run(() =>
                 {
-                    // 异步的标准用法之一，很关键哦
-                    await Task.Run(() =>
+                    try
                     {
                         HashAlgorithm hash = HashAlgorithm.Create(HashType);
                         byte[] result = hash.ComputeHash(FS);
                         HashResult = GetHash.FormatBytes(result);
-                    });
-                }
-                finally { FS?.Dispose(); }
+                    }
+                    catch { }
+                    finally
+                    {
+                        FS?.Dispose();
+                    }
+                });
             }
+        }
+
+        /// <summary>
+        /// 取消当前任务（如果任务存在）
+        /// </summary>
+        public void Stop()
+        {
+            // 这里的写法非常简单粗暴，直接关闭文件流，忽略异常
+            // 正常的写法应当是使用 CancellationTokenSource 及其 Token，
+            // 在循环中使用buffer读取文件，在CTS.Cancel()后跳出循环
+            FS?.Dispose();
         }
 
         /// <summary>

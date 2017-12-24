@@ -16,8 +16,6 @@ namespace FileHasherWPF
         private bool isTextMode;
         // 文本框第一次点击时清空内容
         private bool firstClick = true;
-        // 是否显示完整的路径
-        private bool isFullPath;
 
         // 获取环境换行符
         private static string nl = Environment.NewLine;
@@ -31,13 +29,6 @@ namespace FileHasherWPF
         }
 
         #region 文件的控制逻辑
-
-        // 事件：文件队列更新
-
-        // 事件：文件哈希完成
-
-        // 事件：队列中所有文件哈希完成
-
         // 当前任务列表与文件读取进度
         List<GetFileHash> hashList = new List<GetFileHash>();
         long totalFileBytes = 0L;
@@ -47,16 +38,11 @@ namespace FileHasherWPF
         // 处理打开多个文件的逻辑控制
         // 异步调用哈希算法，异步输出结果，避免死锁
         // 尽量使用TAP模式，避免EAP、APM模式
-        // 此处void用作事件处理，其它情况异步应避免使用void
+        // 此处void用作事件处理，其它情况异步应避免使用void，改用Task
         private void HashFiles(string[] files)
         {
-            // 判断文件，不支持目录
-            if ((files == null) || (files.Length <= 0)) return;
-            if (isProcessing == false)
-            {
-                FirstClear();
-                SetGUIBusy();
-            }
+            if ((files == null) || (files.Length <= 0)) return; // 判断文件，不支持目录
+            FirstClear();
             // 添加到处理队列
             foreach (string f in files)
             {
@@ -65,7 +51,9 @@ namespace FileHasherWPF
                 hashList.Add(task);
                 GoHash(task);
             }
+            SetGUIBusy();
         }
+        // 异步处理文件
         async void GoHash(GetFileHash task)
         {
 #if DEBUG
@@ -74,53 +62,64 @@ namespace FileHasherWPF
             await task.StartHash();
             AddResult(task);
 #if DEBUG
-            timer.Stop(); textBox_Stream.AppendText("耗时：" + timer.Elapsed.Milliseconds + "ms" + nl + nl);
+            timer.Stop(); textBox_Stream.AppendText("耗时：" + timer.Elapsed.TotalMilliseconds + "ms" + nl + nl);
 #endif
         }
 
+        // 输出结果
         private void AddResult(GetFileHash result)
         {
-            if ((result.HashResult == ConstStrings.FILE_ERROR) ||
-                (result.HashResult == ConstStrings.HASH_INCOMPL))
-                return;
-            isFullPath = checkBox_IsFullPath.IsChecked.Value;
-            textBox_HashCode.Text = result.HashResult;
+            string str = result.HashResult;
+            if ((str != ConstStrings.FILE_ERROR) &&
+                (str != ConstStrings.HASH_INCOMPL))
+            { textBox_HashCode.Text = str; }
+            // 是否显示完整的路径
+            bool isFullPath = checkBox_IsFullPath.IsChecked.Value;
             textBox_Stream.AppendText((isFullPath ? result.FilePath : result.FileName) + nl
-                + result.HashResult + nl + nl);
+                + str + nl + nl);
         }
 
         // 停止任务
-        private void StopHashing()
+        private void Button_Stop_Click(object sender, RoutedEventArgs e)
         {
-            SetGUIIdle();
+            foreach (var hash in hashList)
+            {
+                hash.Stop();
+            }
+            SetGUIIdle(); //此句冗余，仅为了GUI更快响应
         }
         // 任务开始与停止时更新GUI
-        // 异步线程一般无法直接往UI线程写入，且应避免从UI线程读
-        // 注意：使用Dispatcher来防止阻塞UI是个坏习惯
+        // 另外：异步线程一般无法直接往UI线程写入，且应避免从UI线程读
+        // 另外：使用Dispatcher来防止阻塞UI是个坏习惯
         private void SetGUIBusy()
         {
-            isProcessing = true;
-            button_Stop.IsEnabled = true;
-            checkBox_IsText.IsEnabled = false;
-            progressBar.Visibility = Visibility.Visible;
-            // 异步更新进度条
-            UpdateProgressBar();
+            if (!isProcessing)
+            {
+                isProcessing = true;
+                button_Stop.IsEnabled = true;
+                checkBox_IsText.IsEnabled = false;
+                progressBar.Visibility = Visibility.Visible;
+                UpdateProgressBar(); // 更新进度条
+            }
         }
         private void SetGUIIdle()
         {
-            isProcessing = false;
-            totalFileBytes = 0L;
-            hashList.Clear();
-            button_Stop.IsEnabled = false;
-            checkBox_IsText.IsEnabled = true;
-            progressBar.Visibility = Visibility.Collapsed;
-            // 滚动到最后一行
-            textBox_Stream.Focus();
-            textBox_Stream.CaretIndex = textBox_Stream.Text.Length; // 插入光标到末尾
-            textBox_Stream.ScrollToEnd();
+            if (isProcessing)
+            {
+                hashList.Clear();
+                totalFileBytes = 0L;
+                isProcessing = false;
+                button_Stop.IsEnabled = false;
+                checkBox_IsText.IsEnabled = true;
+                progressBar.Visibility = Visibility.Collapsed;
+                // 滚动到最后一行
+                textBox_Stream.Focus();
+                textBox_Stream.CaretIndex = textBox_Stream.Text.Length; // 插入光标到末尾
+                textBox_Stream.ScrollToEnd();
+            }
         }
-        // 基于所有任务（处理队列）的进度条更新
-        // 数据绑定是基于事件的，每一次属性的变更传递事件到控件，而不是由控件本身来主动、定时访问。
+        // 异步，基于所有任务（处理队列）的进度条更新
+        // 另外：数据绑定是基于事件的，每一次属性的变更传递事件到控件，而不是由控件本身来主动、定时访问。
         // 既然文件哈希的过程是确定的，那么此处从简设计，使用固定的更新频率来显示进度条
         async void UpdateProgressBar()
         {
@@ -133,12 +132,11 @@ namespace FileHasherWPF
                     currentFileBytes += hash.GetCurrentBytesPosition();
                 }
                 progressBar.Value = currentFileBytes;
-                await Task.Delay(100);
+                await Task.Delay(100); // 0.1秒间隔
             }
             while (currentFileBytes < totalFileBytes);
             SetGUIIdle();
         }
-
         #endregion
 
         #region 文本框的逻辑
@@ -147,7 +145,7 @@ namespace FileHasherWPF
         {
             if (firstClick)
             {
-                textBox_Stream.Text = "";
+                textBox_Stream.Clear();
                 firstClick = false;
             }
         }
@@ -157,7 +155,7 @@ namespace FileHasherWPF
         {
             FirstClear();
         }
-        // 文本框文本有变动
+        // 文本框变动
         private void TextBox_Stream_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (!firstClick && isTextMode)
@@ -203,12 +201,6 @@ namespace FileHasherWPF
         #endregion
 
         #region 各按钮的点击
-        // 停止任务
-        private void Button_Stop_Click(object sender, RoutedEventArgs e)
-        {
-            StopHashing();
-        }
-
         // 打开文件对话框
         private void Button_GetHash_Click(object sender, RoutedEventArgs e)
         {
@@ -234,9 +226,9 @@ namespace FileHasherWPF
             if (text != null)
             {
                 // 去除无关符号
-                text = text.Replace(" ", "");
-                text = text.Replace("-", "");
-                text = text.Replace(":", "");
+                text = text.Replace(" ", string.Empty);
+                text = text.Replace("-", string.Empty);
+                text = text.Replace(":", string.Empty);
                 textBox_HashCodeForCompare.Text = text;
             }
         }
@@ -246,7 +238,7 @@ namespace FileHasherWPF
         {
             string a = textBox_HashCode.Text;
             string b = textBox_HashCodeForCompare.Text;
-            if ((a != "") && (b != ""))
+            if ((a != string.Empty) && (b != string.Empty))
             {
                 if (a.Equals(b, StringComparison.CurrentCultureIgnoreCase))
                 { MessageBox.Show(ConstStrings.HASH_EQUAL, ConstStrings.SUCCESS); }
@@ -259,9 +251,9 @@ namespace FileHasherWPF
         private void Button_Clear_Click(object sender, RoutedEventArgs e)
         {
             // FirstClear()被包含在其它操作中，因此不再多写
-            textBox_Stream.Text = "";
-            textBox_HashCodeForCompare.Text = "";
-            textBox_HashCode.Text = "";
+            textBox_Stream.Clear();
+            textBox_HashCodeForCompare.Clear();
+            textBox_HashCode.Clear();
         }
         #endregion
 
@@ -294,8 +286,8 @@ namespace FileHasherWPF
             isTextMode = true;
             textBlock_Info.Text = Application.Current.MainWindow.FindResource("STR_STRINGS").ToString();
             textBox_Stream.IsReadOnly = false;
-            textBox_Stream.Focus();
             FirstClear();
+            textBox_Stream.Focus();
         }
         private void CheckBox_IsText_Unchecked(object sender, RoutedEventArgs e)
         {
