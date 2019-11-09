@@ -1,4 +1,4 @@
-﻿using Utils;
+using Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
