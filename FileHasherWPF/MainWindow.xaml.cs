@@ -18,7 +18,7 @@ namespace FileHasherWPF
         private bool firstClick = true;
 
         // 获取环境换行符
-        private static string nl = Environment.NewLine;
+        private static readonly string nl = Environment.NewLine;
 
         public MainWindow()
         {
