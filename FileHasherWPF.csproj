@@ -5,6 +5,11 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>src/Resources/RecursivelyCheckAll_256x_PNG.ico</ApplicationIcon>
+    <!--<PublishSingleFile>true</PublishSingleFile>-->
+    <!--<PublishTrimmed>true</PublishTrimmed>-->
+    <!--<RuntimeIdentifier>win-x64</RuntimeIdentifier>-->
+    <!--提升初次启动性能，但会显著增大生成文件体积-->
+    <!--<PublishReadyToRun>true</PublishReadyToRun>-->
   </PropertyGroup>
 
 </Project>
