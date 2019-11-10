@@ -1,10 +1,10 @@
-using Utils;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
-using Microsoft.Win32;
 using System.Windows.Controls;
+using Utils;
 
 namespace FileHasherWPF
 {
@@ -18,7 +18,7 @@ namespace FileHasherWPF
         private bool firstClick = true;
 
         // 获取环境换行符
-        private static readonly string nl = Environment.NewLine;
+        private static readonly string newline = Environment.NewLine;
 
         public MainWindow()
         {
@@ -62,7 +62,7 @@ namespace FileHasherWPF
             await task.StartHash();
             AddResult(task);
 #if DEBUG
-            timer.Stop(); textBox_Stream.AppendText("耗时：" + timer.Elapsed.TotalMilliseconds + "ms" + nl + nl);
+            timer.Stop(); textBox_Stream.AppendText("耗时：" + timer.Elapsed.TotalMilliseconds + "ms" + newline + newline);
 #endif
         }
         // 输出结果
@@ -74,8 +74,8 @@ namespace FileHasherWPF
             { textBox_HashCode.Text = str; }
             // 是否显示完整的路径
             bool isFullPath = checkBox_IsFullPath.IsChecked.Value;
-            textBox_Stream.AppendText((isFullPath ? result.FilePath : result.FileName) + nl
-                + str + nl + nl);
+            textBox_Stream.AppendText((isFullPath ? result.FilePath : result.FileName) + newline
+                + str + newline + newline);
         }
 
         // 停止任务
