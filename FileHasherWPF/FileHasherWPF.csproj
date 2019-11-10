@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>src/Resources/RecursivelyCheckAll_256x_PNG.ico</ApplicationIcon>
+    <ApplicationIcon>Resources/RecursivelyCheckAll_256x_PNG.ico</ApplicationIcon>
     <!--<PublishSingleFile>true</PublishSingleFile>-->
     <!--<PublishTrimmed>true</PublishTrimmed>-->
     <!--<RuntimeIdentifier>win-x64</RuntimeIdentifier>-->
