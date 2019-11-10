@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileHasherWPF", "FileHasherWPF\FileHasherWPF.csproj", "{5F372924-DB11-41D7-A623-B144B0A1376C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileHasherWPF.Tests", "FileHasherWPF.Tests\FileHasherWPF.Tests.csproj", "{CB5748BF-AC68-4671-BB20-877E95219AB1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5F372924-DB11-41D7-A623-B144B0A1376C} = {5F372924-DB11-41D7-A623-B144B0A1376C}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
