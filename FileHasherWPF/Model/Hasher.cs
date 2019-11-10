@@ -23,9 +23,9 @@ namespace FileHasherWPF.Model
         }
 
         // 此处使用了自动属性，因而不再需要私有成员
-        public string HashAlgo { get; set; }
+        public string HashAlgo { get; }
 
-        public string Input { get; set; }
+        public string Input { get; }
 
         public string HashResult { get; protected set; }
 
