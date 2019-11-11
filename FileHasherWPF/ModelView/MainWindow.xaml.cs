@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Utils;
 
-namespace FileHasherWPF
+namespace FileHasherWPF.View
 {
     public partial class MainWindow : Window
     {
