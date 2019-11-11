@@ -14,6 +14,12 @@ namespace FileHasherWPF.Model
     /// </summary>
     public abstract class Hasher
     {
+
+        public const string HASH_EQUAL = "校验值相同";
+        public const string SUCCESS = "恭喜";
+        public const string HASH_UNEQUAL = "校验值不同！";
+        public const string CAUTION = "注意！";
+
         public enum HashAlgos
         {
             MD5,
@@ -87,11 +93,98 @@ namespace FileHasherWPF.Model
     /// </summary>
     public class FileHasher : Hasher
     {
+        public const string FILE_ERROR = "文件读取错误！";
+        public const string HASH_INCOMPL = "已取消文件读取";
 
+        public string FileName { get; }
+
+        public long FileLength { get; }
+
+        public long CurrentBytesPosition => GetCurrentBytesPosition();
+
+        private FileStream FS { get; }
+
+        /// <summary>
+        /// 对文件进行哈希运算
+        /// </summary>
+        /// <param name="algo">指定哈希算法</param>
+        /// <param name="input">指定文件路径</param>
         public FileHasher(HashAlgos algo, string input) : base(algo, input)
         {
-
+            // 获取文件名是纯字符串操作，不会抛出文件系统异常。错误的文件名返回空串
+            FileName = Path.GetFileName(Input);
+            HashResult = HASH_INCOMPL;
+            try
+            {
+                // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
+                // 因为写在try中，所以不必using(){}的用法，但需要注意Dispose()
+                FS = File.OpenRead(Input);
+                //FS = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+                FileLength = FS.Length;
+            }
+            catch
+            {
+                HashResult = FILE_ERROR;
+                FileLength = 0L;
+                // 读取过程中并不隐含Dispose()方法，但是GC会自动回收（有延迟）
+                FS?.Dispose();
+            }
         }
+
+        /// <summary>
+        /// 开始计算文件哈希值
+        /// </summary>
+        public async Task StartHashFile()
+        {
+            if (FS != null && HashResult != FILE_ERROR)
+            {
+                // 异步的标准用法之一，很关键哦
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        HashAlgorithm hash = HashAlgorithm.Create(HashAlgo);
+                        byte[] result = hash.ComputeHash(FS);
+                        HashResult = FormatBytes(result);
+                    }
+                    catch { }
+                    finally
+                    {
+                        FS?.Dispose();
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// 取消当前任务（如果任务存在）
+        /// </summary>
+        public void Stop()
+        {
+            // 这里的写法非常简单粗暴，直接关闭文件流，忽略异常
+            // 正常的写法应当是使用 CancellationTokenSource 及其 Token，
+            // 在循环中使用buffer读取文件，在CTS.Cancel()后跳出循环
+            if (FS != null && HashResult == HASH_INCOMPL)
+                FS.Dispose();
+        }
+
+        /// <summary>
+        /// 获取当前文件读取字节位置，如异常则返回文件长度（默认为0）
+        /// </summary>
+        private long GetCurrentBytesPosition()
+        {
+            // 无法直接得知IDisposable是否已被Dispose()，可catch异常，
+            // 或额外用个bool挂旗，或进一步override Dispose()方法等
+            try
+            {
+                return FS.Position;
+            }
+            catch
+            {
+                return FileLength;
+            }
+        }
+
     }
 
 }
