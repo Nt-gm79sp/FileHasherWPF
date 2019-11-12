@@ -74,7 +74,7 @@ namespace FileHasherWPF.View
             { textBox_HashCode.Text = str; }
             // 是否显示完整的路径
             bool isFullPath = checkBox_IsFullPath.IsChecked.Value;
-            textBox_Stream.AppendText((isFullPath ? result.Input : result.FileName) + newline
+            textBox_Stream.AppendText((isFullPath ? result.FilePath : result.FileName) + newline
                 + str + newline + newline);
         }
 
@@ -199,7 +199,10 @@ namespace FileHasherWPF.View
         }
         private void OnDragLeave(object sender, DragEventArgs e)
         {
-            dropOverlay.Visibility = Visibility.Hidden;
+            if (!isTextMode)
+            {
+                dropOverlay.Visibility = Visibility.Hidden;
+            }
         }
         #endregion
 
