@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Utils;
+using FileHasherWPF.Model;
 
 namespace FileHasherWPF.View
 {
     public partial class MainWindow : Window
     {
         // 指定校验类型
-        private string hashType;
+        private Hasher.HashAlgos hashAlgo;
         // 校验文本模式
         private bool isTextMode;
         // 文本框第一次点击时清空内容
@@ -30,7 +30,7 @@ namespace FileHasherWPF.View
 
         #region 文件的控制逻辑
         // 当前任务列表与文件读取进度
-        List<GetFileHash> hashList = new List<GetFileHash>();
+        List<FileHasher> hashList = new List<FileHasher>();
         long totalFileBytes = 0L;
         long currentFileBytes = 0L;
         bool isProcessing = false; // 文件大小有可能为0，不宜用于判断任务状态，虽然巧妙但容易出错
@@ -46,7 +46,7 @@ namespace FileHasherWPF.View
             // 添加到处理队列
             foreach (string f in files)
             {
-                var task = new GetFileHash(hashType, f);
+                var task = new FileHasher(hashAlgo, f);
                 totalFileBytes += task.FileLength;
                 hashList.Add(task);
                 GoHash(task);
@@ -54,27 +54,27 @@ namespace FileHasherWPF.View
             SetGUIBusy();
         }
         // 异步处理文件
-        async void GoHash(GetFileHash task)
+        async void GoHash(FileHasher task)
         {
 #if DEBUG
             var timer = new System.Diagnostics.Stopwatch(); timer.Start();
 #endif
-            await task.StartHash();
+            await task.StartHashFile();
             AddResult(task);
 #if DEBUG
             timer.Stop(); textBox_Stream.AppendText("耗时：" + timer.Elapsed.TotalMilliseconds + "ms" + newline + newline);
 #endif
         }
         // 输出结果
-        private void AddResult(GetFileHash result)
+        private void AddResult(FileHasher result)
         {
             string str = result.HashResult;
-            if ((str != ConstStrings.FILE_ERROR) &&
-                (str != ConstStrings.HASH_INCOMPL))
+            if ((str != Hasher.STATUS.FILE_ERROR) &&
+                (str != Hasher.STATUS.HASH_INCOMPL))
             { textBox_HashCode.Text = str; }
             // 是否显示完整的路径
             bool isFullPath = checkBox_IsFullPath.IsChecked.Value;
-            textBox_Stream.AppendText((isFullPath ? result.FilePath : result.FileName) + newline
+            textBox_Stream.AppendText((isFullPath ? result.Input : result.FileName) + newline
                 + str + newline + newline);
         }
 
@@ -129,7 +129,7 @@ namespace FileHasherWPF.View
                 currentFileBytes = 0L;
                 foreach (var hash in hashList)
                 {
-                    currentFileBytes += hash.GetCurrentBytesPosition();
+                    currentFileBytes += hash.CurrentBytesPosition;
                 }
                 progressBar.Value = currentFileBytes;
                 await Task.Delay(100); // 0.1秒间隔
@@ -160,7 +160,7 @@ namespace FileHasherWPF.View
         {
             if (!firstClick && isTextMode)
             {
-                textBox_HashCode.Text = GetHash.GetStringHash(hashType, textBox_Stream.Text);
+                textBox_HashCode.Text = new StringHasher(hashAlgo, textBox_Stream.Text).HashResult;
             }
         }
         #endregion
@@ -243,9 +243,9 @@ namespace FileHasherWPF.View
             if ((a != string.Empty) && (b != string.Empty))
             {
                 if (a.Equals(b, StringComparison.CurrentCultureIgnoreCase))
-                { MessageBox.Show(ConstStrings.HASH_EQUAL, ConstStrings.SUCCESS); }
+                { MessageBox.Show(Hasher.STATUS.HASH_EQUAL, Hasher.STATUS.SUCCESS); }
                 else
-                { MessageBox.Show(ConstStrings.HASH_UNEQUAL, ConstStrings.CAUTION, MessageBoxButton.OK, MessageBoxImage.Exclamation); }
+                { MessageBox.Show(Hasher.STATUS.HASH_UNEQUAL, Hasher.STATUS.CAUTION, MessageBoxButton.OK, MessageBoxImage.Exclamation); }
             }
         }
 
@@ -263,22 +263,22 @@ namespace FileHasherWPF.View
         private void RadioButton_MD5_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 32;
-            hashType = "MD5";
+            hashAlgo = Hasher.HashAlgos.MD5;
         }
         private void RadioButton_SHA1_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 40;
-            hashType = "SHA1";
+            hashAlgo = Hasher.HashAlgos.SHA1;
         }
         private void RadioButton_SHA256_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 64;
-            hashType = "SHA256";
+            hashAlgo = Hasher.HashAlgos.SHA256;
         }
         private void RadioButton_SHA512_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 128;
-            hashType = "SHA512";
+            hashAlgo = Hasher.HashAlgos.SHA512;
         }
         #endregion
 
