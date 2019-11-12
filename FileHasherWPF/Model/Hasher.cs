@@ -96,8 +96,8 @@ namespace FileHasherWPF.Model
     /// </summary>
     public class FileHasher : Hasher
     {
+        public string FilePath { get; }
         public string FileName { get; }
-
         public long FileLength { get; }
 
         public long CurrentBytesPosition => GetCurrentBytesPosition();
@@ -112,13 +112,14 @@ namespace FileHasherWPF.Model
         public FileHasher(HashAlgos algo, string input) : base(algo, input)
         {
             // 获取文件名是纯字符串操作，不会抛出文件系统异常。错误的文件名返回空串
-            FileName = Path.GetFileName(Input);
+            FilePath = Path.GetFullPath(Input);
+            FileName = Path.GetFileName(FilePath);
             HashResult = STATUS.HASH_INCOMPL;
             try
             {
                 // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
                 // 因为写在try中，所以不必using(){}的用法，但需要注意Dispose()
-                FS = File.OpenRead(Input);
+                FS = File.OpenRead(FilePath);
                 //FS = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
                 FileLength = FS.Length;
             }
