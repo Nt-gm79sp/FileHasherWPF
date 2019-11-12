@@ -14,11 +14,15 @@ namespace FileHasherWPF.Model
     /// </summary>
     public abstract class Hasher
     {
-
-        public const string HASH_EQUAL = "校验值相同";
-        public const string SUCCESS = "恭喜";
-        public const string HASH_UNEQUAL = "校验值不同！";
-        public const string CAUTION = "注意！";
+        public struct STATUS
+        {
+            public const string HASH_EQUAL = "校验值相同";
+            public const string SUCCESS = "恭喜";
+            public const string HASH_UNEQUAL = "校验值不同！";
+            public const string CAUTION = "注意！";
+            public const string FILE_ERROR = "文件读取错误！";
+            public const string HASH_INCOMPL = "已取消文件读取";
+        }
 
         public enum HashAlgos
         {
@@ -93,9 +97,6 @@ namespace FileHasherWPF.Model
     /// </summary>
     public class FileHasher : Hasher
     {
-        public const string FILE_ERROR = "文件读取错误！";
-        public const string HASH_INCOMPL = "已取消文件读取";
-
         public string FileName { get; }
 
         public long FileLength { get; }
@@ -113,7 +114,7 @@ namespace FileHasherWPF.Model
         {
             // 获取文件名是纯字符串操作，不会抛出文件系统异常。错误的文件名返回空串
             FileName = Path.GetFileName(Input);
-            HashResult = HASH_INCOMPL;
+            HashResult = STATUS.HASH_INCOMPL;
             try
             {
                 // 以只读模式打开，不指定进程共享（独占）参数、异步读取参数
@@ -124,7 +125,7 @@ namespace FileHasherWPF.Model
             }
             catch
             {
-                HashResult = FILE_ERROR;
+                HashResult = STATUS.FILE_ERROR;
                 FileLength = 0L;
                 // 读取过程中并不隐含Dispose()方法，但是GC会自动回收（有延迟）
                 FS?.Dispose();
@@ -136,7 +137,7 @@ namespace FileHasherWPF.Model
         /// </summary>
         public async Task StartHashFile()
         {
-            if (FS != null && HashResult != FILE_ERROR)
+            if (FS != null && HashResult != STATUS.FILE_ERROR)
             {
                 // 异步的标准用法之一，很关键哦
                 await Task.Run(() =>
@@ -147,7 +148,10 @@ namespace FileHasherWPF.Model
                         byte[] result = hash.ComputeHash(FS);
                         HashResult = FormatBytes(result);
                     }
-                    catch { }
+                    catch
+                    {
+                        HashResult = STATUS.FILE_ERROR;
+                    }
                     finally
                     {
                         FS?.Dispose();
@@ -164,7 +168,7 @@ namespace FileHasherWPF.Model
             // 这里的写法非常简单粗暴，直接关闭文件流，忽略异常
             // 正常的写法应当是使用 CancellationTokenSource 及其 Token，
             // 在循环中使用buffer读取文件，在CTS.Cancel()后跳出循环
-            if (FS != null && HashResult == HASH_INCOMPL)
+            if (FS != null && HashResult == STATUS.HASH_INCOMPL)
                 FS.Dispose();
         }
 
