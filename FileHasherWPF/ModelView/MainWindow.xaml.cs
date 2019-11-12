@@ -140,6 +140,11 @@ namespace FileHasherWPF.View
         #endregion
 
         #region 文本框的逻辑
+        // 文本框被聚焦
+        private void TextBox_Stream_GotFocus(object sender, RoutedEventArgs e)
+        {
+            FirstClear();
+        }
         // 文本框的首次清空
         private void FirstClear()
         {
@@ -149,14 +154,12 @@ namespace FileHasherWPF.View
                 firstClick = false;
             }
         }
-
-        // 文本框被聚焦
-        private void TextBox_Stream_GotFocus(object sender, RoutedEventArgs e)
-        {
-            FirstClear();
-        }
         // 文本框变动
         private void TextBox_Stream_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            HashTextBoxText();
+        }
+        private void HashTextBoxText()
         {
             if (!firstClick && isTextMode)
             {
@@ -180,14 +183,14 @@ namespace FileHasherWPF.View
         // 拖放文件到窗口
         private void OnDragEnter(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (!isTextMode && e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 dropOverlay.Visibility = Visibility.Visible;
             }
         }
         private void OnFilesDrop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (!isTextMode && e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 dropOverlay.Visibility = Visibility.Hidden;
@@ -264,21 +267,25 @@ namespace FileHasherWPF.View
         {
             textBox_HashCodeForCompare.MaxLength = 32;
             hashAlgo = Hasher.HashAlgos.MD5;
+            HashTextBoxText();
         }
         private void RadioButton_SHA1_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 40;
             hashAlgo = Hasher.HashAlgos.SHA1;
+            HashTextBoxText();
         }
         private void RadioButton_SHA256_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 64;
             hashAlgo = Hasher.HashAlgos.SHA256;
+            HashTextBoxText();
         }
         private void RadioButton_SHA512_Checked(object sender, RoutedEventArgs e)
         {
             textBox_HashCodeForCompare.MaxLength = 128;
             hashAlgo = Hasher.HashAlgos.SHA512;
+            HashTextBoxText();
         }
         #endregion
 
@@ -290,6 +297,7 @@ namespace FileHasherWPF.View
             textBox_Stream.IsReadOnly = false;
             FirstClear();
             textBox_Stream.Focus();
+            HashTextBoxText();
         }
         private void CheckBox_IsText_Unchecked(object sender, RoutedEventArgs e)
         {
